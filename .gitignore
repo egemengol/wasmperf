@@ -1,0 +1,7 @@
+.mypy_cache
+.vscode
+.idea
+temp
+logs
+out/main
+out/t.*

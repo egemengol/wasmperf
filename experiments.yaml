@@ -1,0 +1,15 @@
+
+- name: merge
+  params:
+    SIZE: 1000000
+    N_LEVELS: 0
+  arch: NATIVE
+  repetitions: 1
+
+- name: merge
+  params:
+    SIZE: 1000000
+    N_LEVELS: 0
+  arch: WASM_SINGLE
+  repetitions: 8
+
