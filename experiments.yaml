@@ -1,13 +1,10 @@
-
-browsers:
-  - /usr/bin/google-chrome
-  - /usr/bin/firefox
-
 algs:
   merge:
     - arch: 
         - NATIVE
         - WASM_SINGLE
+          - /usr/bin/google-chrome
+          - /usr/bin/firefox
       runs:
         - params:
             SIZE: 100000

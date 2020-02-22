@@ -1,18 +1,16 @@
-import yaml
 from pathlib import Path
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Dict, Any, List
 import logging
 import subprocess
-from shlex import quote
 
-"""
-with open("experiments.yaml") as f:
-    from pprint import pprint
-    exs = yaml.load(f, Loader=yaml.SafeLoader)
-    pprint(exs)
-"""
+
+logging.basicConfig(
+    level=logging.INFO, 
+    format="%(asctime)s -- %(levelname)s -- %(message)s", 
+    datefmt="%H.%M.%S",
+)
 
 
 def algname2path(alg_name: str) -> Path:
@@ -39,8 +37,9 @@ class ExpAbstract(ABC):
         pass
 
     @property
+    @abstractmethod
     def log_path(self) -> Path:
-        return Path("logs") / str(self)
+        pass
 
 
 @dataclass
@@ -48,6 +47,7 @@ class ExpDataMixin:
     alg_name: str
     params: Dict[str, Any]
     repetitions: int
+    browsers: List[str]
 
 
 class Experiment(ExpDataMixin, ExpAbstract):
@@ -57,21 +57,17 @@ class Experiment(ExpDataMixin, ExpAbstract):
     def source(self) -> Path:
         return algname2path(self.alg_name)
 
-    @property
-    def dir_path(self) -> Path:
-        return Path("out") / quote(str(self))
-
 
 class ExperimentNative(Experiment):
     def run(self) -> None:
-        with open(self.log_path, "wb") as f:
+        with open(self.log_path, "a") as f:
             for _ in range(self.repetitions):
                 res = subprocess.run(
                     [self.dir_path / "main"],
                     stdout=subprocess.PIPE,
                     check=True)
-                f.write(res.stdout)
-        logging.info(f"Finished measuring {self} {self.repetitions} times.")
+                f.write(res.stdout.decode())
+        logging.info(f"Finished measuring {self} -- {self.repetitions} times.")
 
     def __str__(self) -> str:
         params = " ".join([
@@ -79,52 +75,59 @@ class ExperimentNative(Experiment):
         return f"{self.alg_name} native {params}"
 
     @property
+    def dir_path(self) -> Path:
+        params = "_".join([f"{k.lower()}_{v}" for k, v in self.params.items()])
+        return Path("out") / f"{self.alg_name}_native_{params}"
+
+    @property
+    def log_path(self) -> Path:
+        return Path("logs") / self.dir_path.name
+
+    @property
+    def target_path(self) -> Path:
+        return (self.dir_path / "main").resolve()
+
+    @property
     def make_command(self) -> str:
         depends_on = self.source
 
         comm_strings = [
             "clang++ -O3 -pthread -std=c++17 -DNDEBUG",
-            f"-o {self.dir_path}/main",
+            f"-o {self.dir_path.resolve()}/main",
         ]
         for k, v in self.params.items():
             comm_strings.append(f"-D {k}={v}")
         comm_strings.append(str(depends_on.resolve()))
 
         return (
-            f"{self.alg_name}_native: {depends_on}\n"
+            f"{self.target_path}: {depends_on}\n"
             f"\t{' '.join(comm_strings)}"
         )
 
 
 class ExperimentWasm(Experiment):
-    BROWSERS = [
-        Path("/usr/bin/firefox"),
-        Path("/usr/bin/google-chrome"),
-    ]
-
     def run(self):
-        for p in self.BROWSERS:
+        for browser in self.browsers:
             for _ in range(self.repetitions):
+                log_path = str(self.log_path.resolve())+"_"+Path(browser).name
                 subprocess.run([
                         "emrun",
                         "--browser",
-                        p,
+                        browser,
                         "--serve_after_close",
                         "--serve_root",
-                        self.dir_path,
+                        self.dir_path.resolve(),
                         "--log_stdout",
-                        self.log_path(p),
+                        log_path,
                         "--verbose",
                         "index.html",
                     ],
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
                 )
-            logging.info(f"Finished measuring {p} {self.repetitions} times.")
-
-    @property
-    def log_path(self, with_browser) -> Path:
-        return super().log_path + f" {with_browser}"
+            logging.info((
+                f"Finished measuring {self} {browser} -- "
+                f"{self.repetitions} times."))
 
 
 class ExperimentWasmSingle(ExperimentWasm):
@@ -133,13 +136,28 @@ class ExperimentWasmSingle(ExperimentWasm):
         return f"{self.alg_name} wasm_single {params}"
 
     @property
+    def dir_path(self) -> Path:
+        params = "_".join([f"{k.lower()}_{v}" for k, v in self.params.items()])
+        return Path("out") / (
+            f"{self.alg_name}_wasm_single_"
+            f"{params}")
+
+    @property
+    def log_path(self) -> Path:
+        return Path("logs") / self.dir_path.name
+
+    @property
+    def target_path(self) -> Path:
+        return (self.dir_path / "t.js").resolve()
+
+    @property
     def make_command(self) -> str:
         depends_on = self.source
 
         comm_strings = [
             "emcc -std=c++17 -Os -DNDEBUG --llvm-lto 1",
             "-s TOTAL_MEMORY=1073741824 --emrun",
-            f"-o {self.dir_path}/t.js",
+            f"-o {self.dir_path.resolve()}/t.js",
             "-s NO_FILESYSTEM=1",
         ]
         for k, v in self.params.items():
@@ -147,52 +165,6 @@ class ExperimentWasmSingle(ExperimentWasm):
         comm_strings.append(str(depends_on.resolve()))
 
         return (
-            f"{self.alg_name}_wasm_single: {depends_on}\n"
+            f"{self.target_path}: {depends_on}\n"
             f"\t{' '.join(comm_strings)}"
         )
-
-
-@dataclass
-class Lab:
-    exps: List[Experiment]
-    browsers: List[str]
-
-    def from_yaml(path: Path):
-        with open(path) as f:
-            yam = yaml.load(f, Loader=yaml.SafeLoader)
-
-        experiments: List[Experiment] = list()
-
-        for alg_name, comparisons in yam["algs"].items():
-            comparisons: Dict[Any]
-            for comp in comparisons:
-                arches: List[str] = comp['arch']
-                runs: List[Dict[str, Any]] = comp['runs']
-                for arch in arches:
-                    for run in runs:
-                        if arch == "NATIVE":
-                            cl = ExperimentNative
-                        elif arch == "WASM_SINGLE":
-                            cl = ExperimentWasmSingle
-                        else:
-                            continue
-                        e: Experiment = cl(
-                            alg_name=alg_name,
-                            params=run['params'],
-                            repetitions=run['reps']
-                        )
-                        experiments.append(e)
-
-        return Lab(
-            exps=experiments,
-            browsers=yam["browsers"],
-        )
-
-
-    def create_makefile(self):
-        #TODO
-        pass
-
-
-lab = Lab.from_yaml("experiments.yaml")
-print(lab)

@@ -1,7 +1,9 @@
 .mypy_cache
 .vscode
 .idea
-temp
-logs
-out/main
-out/t.*
+logs/
+out/
+utils/__pycache__/
+__pycache__/
+utils/__pycache__/experiment_test.cpython-37.pyc
+utils/__pycache__/experiment.cpython-37.pyc

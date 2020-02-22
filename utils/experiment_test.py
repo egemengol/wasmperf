@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
         expected = (
             "merge_native: /home/egeme/code/tez_c/src/merge.cpp\n"
             "\tclang++ -O3 -pthread -std=c++17 -DNDEBUG "
-            "-o out/'merge native size=100 n_levels=2'/main "
+            "-o /home/egeme/code/tez_c/out/'merge native size=100 n_levels=2'/main "
             "-D SIZE=100 -D N_LEVELS=2 /home/egeme/code/tez_c/src/merge.cpp"
         )
         self.assertEqual(e.make_command, expected)
@@ -35,7 +35,7 @@ class Test(unittest.TestCase):
             "merge_wasm_single: /home/egeme/code/tez_c/src/merge.cpp\n"
             "\temcc -std=c++17 -Os -DNDEBUG --llvm-lto 1 "
             "-s TOTAL_MEMORY=1073741824 --emrun "
-            "-o out/'merge wasm_single size=100 n_levels=2'/t.js "
+            "-o /home/egeme/code/tez_c/out/'merge wasm_single size=100 n_levels=2'/t.js "
             "-s NO_FILESYSTEM=1 -D SIZE=100 -D N_LEVELS=2 "
             "/home/egeme/code/tez_c/src/merge.cpp"
         )
