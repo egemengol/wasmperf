@@ -1,1 +1,5 @@
-temp/main
+#!/usr/bin/env python3.7
+
+from utils import analyze
+
+analyze.analyze()

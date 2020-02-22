@@ -1,15 +1,32 @@
 
-- name: merge
-  params:
-    SIZE: 1000000
-    N_LEVELS: 0
-  arch: NATIVE
-  repetitions: 1
+browsers:
+  - /usr/bin/google-chrome
+  - /usr/bin/firefox
 
-- name: merge
-  params:
-    SIZE: 1000000
-    N_LEVELS: 0
-  arch: WASM_SINGLE
-  repetitions: 8
-
+algs:
+  merge:
+    - arch: 
+        - NATIVE
+        - WASM_SINGLE
+      runs:
+        - params:
+            SIZE: 100000
+            N_LEVELS: 0
+          reps: 5
+    
+    - arch:
+        - NATIVE
+        - WASM_MULTI
+      runs:
+        - params:
+            SIZE: 100000
+            N_LEVELS: 1
+          reps: 5
+        - params:
+            SIZE: 100000
+            N_LEVELS: 2
+          reps: 6
+        - params:
+            SIZE: 100000
+            N_LEVELS: 3
+          reps: 7

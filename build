@@ -2,7 +2,7 @@
 
 import subprocess
 import os
-from typing import NamedTuple, Dict, Any, List
+from typing import NamedTuple, Dict, Any, List, Type, Optional
 from pathlib import Path
 from dataclasses import dataclass
 from enum import Enum, auto
@@ -11,6 +11,10 @@ import yaml
 import logging
 from abc import abstractmethod, abstractproperty, ABC
 import time
+from pprint import pprint
+
+
+
 
 logging.basicConfig(
     level=logging.INFO, 
@@ -18,24 +22,11 @@ logging.basicConfig(
     datefmt="%H.%M.%S",
 )
 
-
-@dataclass
-class Experiment(ABC):
-    name: str
-    params: Dict[str, Any]
-    repetitions: int
-
+class ExpAbstract(ABC):
     @property
     @abstractmethod
     def make_command(self) -> str:
         pass
-
-    def prepare(self):
-        c = ["make", self.make_command]
-        for k, v in self.params.items():
-            c.append(f"{k}={v}")
-        subprocess.run(c, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-    
 
     @abstractmethod
     def run(self) -> None:
@@ -48,17 +39,33 @@ class Experiment(ABC):
     @abstractmethod
     def get_log_file(self) -> Path:
         pass
-        return Path("./logs/") / str(self)
+
+@dataclass
+class ExpDataMixin:
+    name: str
+    params: Dict[str, Any]
+    repetitions: int
+    browser: Optional[Path] = None
+
+    def prepare(self):
+        c = ["make", self.make_command]
+        for k, v in self.params.items():
+            c.append(f"{k}={v}")
+        subprocess.run(c, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    
+
+class Experiment(ExpDataMixin, ExpAbstract):
+    """Experiment class for typing check"""
 
 
 @dataclass
 class ExperimentNative(Experiment):
     def run(self) -> None:
         with open(self.get_log_file(), "wb") as f:
-            while self.repetitions > 0:
+            for _ in range(self.repetitions):
                 res = subprocess.run(["out/main"], stdout=subprocess.PIPE, check=True)
                 f.write(res.stdout)
-                self.repetitions -= 1
+        logging.info(f"Finished measuring {self} {self.repetitions} times.")
     
     def __str__(self) -> str:
         params = " ".join([ f"{k.lower()}={v}" for k,v in self.params.items() ])
@@ -72,62 +79,34 @@ class ExperimentNative(Experiment):
         return f"{self.name}_native"
 
 
-@dataclass
 class ExperimentWasm(Experiment):
+    BROWSERS = [
+        Path("/usr/bin/firefox"),
+        Path("/usr/bin/google-chrome"),
+    ]
+
     def run(self):
         wd = os.getcwd()
         os.chdir("./out")
-        """
-        while self.repetitions > 0:
-            res = subprocess.run([
-                    "emrun",
-                    "--browser",
-                    "chrome",
-                    "--log_stdout",
-                    self.get_log_file(),
-                    "index.html",
-                ], 
-                stdout=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
-                check=True
-            )
-            self.repetitions -= 1
-            """
-        with open(self.get_log_file(), "wb") as f:
-            while self.repetitions > 0:
+
+        for p in self.BROWSERS:
+            self.browser = p
+            for _ in range(self.repetitions):
                 res = subprocess.run([
                         "emrun",
-                        "--kill_end",
                         "--browser",
-                        "/usr/bin/google-chrome",
+                        p,
+                        "--serve_after_close",
                         "--log_stdout",
-                        "../logs/log",
-                        "--log_stderr",
-                        "../logs/err",
+                        self.get_log_file(),
                         "--verbose",
                         "index.html",
                     ], 
-                    stdout=subprocess.PIPE, 
+                    stdout=subprocess.DEVNULL, 
                     stderr=subprocess.DEVNULL,
                 )
-                f.write(res.stdout)
-                self.repetitions -= 1
-                time.sleep(0.5)
-                
+            logging.info(f"Finished measuring {p.name} {self.repetitions} times.")
         os.chdir(wd)
-    
-    @abstractmethod
-    def __str__(self) -> str:
-        pass
-    
-    @abstractmethod
-    def get_log_file(self) -> Path:
-        pass
-
-    @property
-    @abstractmethod
-    def make_command(self) -> str:
-        pass
 
 
 class ExperimentWasmSingle(ExperimentWasm):
@@ -136,7 +115,10 @@ class ExperimentWasmSingle(ExperimentWasm):
         return f"{self.name} wasm_single {params}"
 
     def get_log_file(self) -> Path:
-        return Path("../logs") / str(self)
+        params = " ".join([ f"{k.lower()}={v}" for k,v in self.params.items() ])
+        if self.browser is None:
+            raise Exception("no browser is specified")
+        return Path("../logs") / f"{self.name} wasm_single {self.browser.name} {params}"
     
     @property
     def make_command(self) -> str:
@@ -146,16 +128,18 @@ class ExperimentWasmSingle(ExperimentWasm):
 class Lab(NamedTuple):
     experiments: List[Experiment]
 
-    def run(self):
+    def prepare(self):
         for e in self.experiments:
             e.prepare()
-            reps = e.repetitions
-            logging.info(f"Finished making {e}")
+
+    def run(self):
+        for e in self.experiments:
             e.run()
-            logging.info(f"Finished measuring {reps} times.")
+            
                 
 
 ##################
+
 
 
 shutil.rmtree("logs", True)
@@ -169,6 +153,7 @@ with open("experiments.yaml") as f:
 experiments: List[Experiment] = []
 for e in exs:
     arch = e['arch'].upper()
+    c: Type[Experiment]
     if arch == "NATIVE":
         c = ExperimentNative
     elif arch == "WASM_SINGLE":
@@ -181,3 +166,15 @@ for e in exs:
     ))
 lab = Lab(experiments)
 lab.run()
+
+def analyze():
+    for p in sorted(Path("logs").iterdir()):
+        with open(p) as f:
+            durs = [l.strip() for l in f]
+        print(p.name)
+        print()
+        print("\t" + "\t".join(durs))
+        print()
+        print()
+
+analyze()
