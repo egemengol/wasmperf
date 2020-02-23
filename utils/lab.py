@@ -7,8 +7,13 @@ import subprocess
 import shutil
 import os
 
-from experiment import Experiment, ExperimentNative
-from experiment import ExperimentWasm, ExperimentWasmSingle
+from experiment import (
+    Experiment,
+    ExperimentNative,
+    ExperimentWasm,
+    ExperimentWasmSingle,
+    ExperimentWasmMulti,
+    )
 
 
 @dataclass
@@ -35,6 +40,9 @@ class Lab:
                         elif arch.startswith("WASM_SINGLE"):
                             browsers = arch.split(" - ")[1:]
                             cl = ExperimentWasmSingle
+                        elif arch.startswith("WASM_MULTI"):
+                            browsers = arch.split(" - ")[1:]
+                            cl = ExperimentWasmMulti
                         else:
                             logging.warning(f"Not supported arch: {arch}")
                             continue
@@ -54,8 +62,6 @@ class Lab:
         Path("logs").mkdir(parents=True, exist_ok=True)
 
     def create_makefile(self) -> None:
-        # TODO use make to figure out recompilations
-        # only then clean previous logs.
         with open("out/Makefile", "w") as f:
             rules = list()
             targets = list()
@@ -65,13 +71,12 @@ class Lab:
 
             targets = ' '.join([str(t) for t in targets])
 
-            f.write(f"all: clear_logs {targets} \n\n")
+            f.write(f"all: {targets}\n\n")
 
             f.write("\n\n".join(rules))
             f.write("\n\n")
 
             f.flush()
-
 
     @staticmethod
     def clear_out():
@@ -110,6 +115,7 @@ class Lab:
 
 
 lab = Lab.from_yaml(Path("experiments.yaml"))
+lab.clear_logs()
 lab.mkdirs()
 lab.create_makefile()
 lab.copy_index_html()

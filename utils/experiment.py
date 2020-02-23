@@ -8,7 +8,7 @@ import subprocess
 
 logging.basicConfig(
     level=logging.INFO, 
-    format="%(asctime)s -- %(levelname)s -- %(message)s", 
+    format="%(asctime)s -- %(levelname)s -- %(message)s",
     datefmt="%H.%M.%S",
 )
 
@@ -101,6 +101,7 @@ class ExperimentNative(Experiment):
 
         return (
             f"{self.target_path}: {depends_on}\n"
+            f"\trm -f {(Path('logs') / self.dir_path.name).resolve()}\n"
             f"\t{' '.join(comm_strings)}"
         )
 
@@ -110,7 +111,7 @@ class ExperimentWasm(Experiment):
         for browser in self.browsers:
             for _ in range(self.repetitions):
                 log_path = str(self.log_path.resolve())+"_"+Path(browser).name
-                subprocess.run([
+                p = subprocess.run([
                         "emrun",
                         "--browser",
                         browser,
@@ -119,12 +120,15 @@ class ExperimentWasm(Experiment):
                         self.dir_path.resolve(),
                         "--log_stdout",
                         log_path,
+                        "--log_stderr",
+                        Path("logs/err").resolve(),
                         "--verbose",
                         "index.html",
                     ],
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
                 )
+                # print(" ".join((str(a) for a in p.args)))
             logging.info((
                 f"Finished measuring {self} {browser} -- "
                 f"{self.repetitions} times."))
@@ -166,5 +170,50 @@ class ExperimentWasmSingle(ExperimentWasm):
 
         return (
             f"{self.target_path}: {depends_on}\n"
+            f"\trm -f {(Path('logs') / self.dir_path.name).resolve()}\n"
+            f"\t{' '.join(comm_strings)}"
+        )
+
+
+class ExperimentWasmMulti(ExperimentWasm):
+    def __str__(self):
+        params = " ".join([f"{k.lower()}={v}" for k, v in self.params.items()])
+        return f"{self.alg_name} wasm_multi {params}"
+
+    @property
+    def dir_path(self) -> Path:
+        params = "_".join([f"{k.lower()}_{v}" for k, v in self.params.items()])
+        return Path("out") / (
+            f"{self.alg_name}_wasm_multi_"
+            f"{params}")
+
+    @property
+    def log_path(self) -> Path:
+        return Path("logs") / self.dir_path.name
+
+    @property
+    def target_path(self) -> Path:
+        return (self.dir_path / "t.js").resolve()
+
+    @property
+    def make_command(self) -> str:
+        depends_on = self.source
+
+        comm_strings = [
+            "emcc -std=c++17 -Os -DNDEBUG --llvm-lto 1",
+            "-s TOTAL_MEMORY=1073741824 --emrun",
+            f"-o {self.dir_path.resolve()}/t.js",
+            "-s USE_PTHREADS=1",
+            "-s PTHREAD_POOL_SIZE=7",
+            "-s PROXY_TO_PTHREAD=1",
+            "--memory-init-file 0",
+        ]
+        for k, v in self.params.items():
+            comm_strings.append(f"-D {k}={v}")
+        comm_strings.append(str(depends_on.resolve()))
+
+        return (
+            f"{self.target_path}: {depends_on}\n"
+            f"\trm -f {(Path('logs') / self.dir_path.name).resolve()}\n"
             f"\t{' '.join(comm_strings)}"
         )
