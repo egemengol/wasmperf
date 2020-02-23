@@ -3,37 +3,24 @@ algs:
     - arch: 
         - WASM_MULTI
           - /usr/bin/google-chrome
+          - /home/egeme/Downloads/firefox/firefox
+        - NATIVE
       runs:
         - params:
-            SIZE: 200000
+            SIZE: 100000
             N_LEVELS: 1
-          reps: 8
+          reps: 2
         - params:
-            SIZE: 200000
+            SIZE: 100000
             N_LEVELS: 2
-          reps: 8
+          reps: 2
     - arch: 
         - WASM_SINGLE
+          - /home/egeme/Downloads/firefox/firefox
           - /usr/bin/google-chrome
+        - NATIVE
       runs:
         - params:
-            SIZE: 200000
+            SIZE: 100000
             N_LEVELS: 0
-          reps: 8
-    
-    # - arch:
-    #     - NATIVE
-    #     - WASM_MULTI
-    #   runs:
-    #     - params:
-    #         SIZE: 100000
-    #         N_LEVELS: 1
-    #       reps: 5
-    #     - params:
-    #         SIZE: 100000
-    #         N_LEVELS: 2
-    #       reps: 6
-    #     - params:
-    #         SIZE: 100000
-    #         N_LEVELS: 3
-    #       reps: 7
+          reps: 2

@@ -7,7 +7,7 @@ import subprocess
 import shutil
 import os
 
-from experiment import (
+from utils.experiment import (
     Experiment,
     ExperimentNative,
     ExperimentWasm,
@@ -114,11 +114,14 @@ class Lab:
             e.run()
 
 
-lab = Lab.from_yaml(Path("experiments.yaml"))
-lab.clear_logs()
-lab.mkdirs()
-lab.create_makefile()
-lab.copy_index_html()
-lab.make()
+def main():
+    lab = Lab.from_yaml(Path("experiments.yaml"))
+    lab.mkdirs()
+    lab.create_makefile()
+    lab.copy_index_html()
+    lab.make()
+    lab.run_exps()
 
-lab.run_exps()
+
+if __name__ == "__main__":
+    main()

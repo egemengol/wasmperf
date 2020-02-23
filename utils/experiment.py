@@ -7,7 +7,6 @@ import subprocess
 
 
 logging.basicConfig(
-    level=logging.INFO, 
     format="%(asctime)s -- %(levelname)s -- %(message)s",
     datefmt="%H.%M.%S",
 )
@@ -76,8 +75,8 @@ class ExperimentNative(Experiment):
 
     @property
     def dir_path(self) -> Path:
-        params = "_".join([f"{k.lower()}_{v}" for k, v in self.params.items()])
-        return Path("out") / f"{self.alg_name}_native_{params}"
+        params = "!".join([f"{k.lower()}+{v}" for k, v in self.params.items()])
+        return Path("out") / f"{self.alg_name}!native!{params}"
 
     @property
     def log_path(self) -> Path:
@@ -110,7 +109,7 @@ class ExperimentWasm(Experiment):
     def run(self):
         for browser in self.browsers:
             for _ in range(self.repetitions):
-                log_path = str(self.log_path.resolve())+"_"+Path(browser).name
+                log_path = str(self.log_path.resolve())+"!"+Path(browser).name
                 p = subprocess.run([
                         "emrun",
                         "--browser",
@@ -141,9 +140,9 @@ class ExperimentWasmSingle(ExperimentWasm):
 
     @property
     def dir_path(self) -> Path:
-        params = "_".join([f"{k.lower()}_{v}" for k, v in self.params.items()])
+        params = "!".join([f"{k.lower()}+{v}" for k, v in self.params.items()])
         return Path("out") / (
-            f"{self.alg_name}_wasm_single_"
+            f"{self.alg_name}!wasm_single!"
             f"{params}")
 
     @property
@@ -182,9 +181,9 @@ class ExperimentWasmMulti(ExperimentWasm):
 
     @property
     def dir_path(self) -> Path:
-        params = "_".join([f"{k.lower()}_{v}" for k, v in self.params.items()])
+        params = "!".join([f"{k.lower()}+{v}" for k, v in self.params.items()])
         return Path("out") / (
-            f"{self.alg_name}_wasm_multi_"
+            f"{self.alg_name}!wasm_multi!"
             f"{params}")
 
     @property
