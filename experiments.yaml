@@ -7,12 +7,38 @@ algs:
           - /home/egeme/Downloads/firefox/firefox
       runs:
         - params:
-            A: 999
-            B: 888
-            C: 777
+            A: 2000
+            B: 1200
+            C: 1500
             SEED: 13
             NUM_THREADS: 4
+          reps: 5
+    - arch:
+        - NATIVE
+        - WASM_MULTI
+          - /usr/bin/google-chrome
+          - /home/egeme/Downloads/firefox/firefox
+      runs:
+        - params:
+            A: 2000
+            B: 1200
+            C: 1500
+            SEED: 13
+            NUM_THREADS: 2
           reps: 4
+    - arch:
+        - NATIVE
+        - WASM_MULTI
+          - /usr/bin/google-chrome
+          - /home/egeme/Downloads/firefox/firefox
+      runs:
+        - params:
+            A: 2000
+            B: 1200
+            C: 1500
+            SEED: 13
+            NUM_THREADS: 1
+          reps: 3
     - arch:
         - NATIVE
         - WASM_SINGLE
@@ -24,30 +50,30 @@ algs:
             B: 888
             C: 777
             SEED: 13
-          reps: 4
+          reps: 0
 
-  # merge:
-  #   - arch: 
-  #       - WASM_MULTI
-  #         - /usr/bin/google-chrome
-  #         - /home/egeme/Downloads/firefox/firefox
-  #       - NATIVE
-  #     runs:
-  #       - params:
-  #           SIZE: 100000
-  #           N_LEVELS: 1
-  #         reps: 2
-  #       - params:
-  #           SIZE: 100000
-  #           N_LEVELS: 2
-  #         reps: 2
-  #   - arch: 
-  #       - WASM_SINGLE
-  #         - /home/egeme/Downloads/firefox/firefox
-  #         - /usr/bin/google-chrome
-  #       - NATIVE
-  #     runs:
-  #       - params:
-  #           SIZE: 100000
-  #           N_LEVELS: 0
-  #         reps: 2
+  merge:
+    - arch: 
+        - WASM_MULTI
+          - /usr/bin/google-chrome
+          - /home/egeme/Downloads/firefox/firefox
+        - NATIVE
+      runs:
+        - params:
+            SIZE: 1000000
+            N_LEVELS: 1
+          reps: 6
+        - params:
+            SIZE: 1000000
+            N_LEVELS: 2
+          reps: 6
+    - arch: 
+        - WASM_SINGLE
+          - /home/egeme/Downloads/firefox/firefox
+          - /usr/bin/google-chrome
+        - NATIVE
+      runs:
+        - params:
+            SIZE: 1000000
+            N_LEVELS: 0
+          reps: 6

@@ -5,4 +5,4 @@ from utils.lab import main
 
 
 main()
-analyze()
+#analyze()
