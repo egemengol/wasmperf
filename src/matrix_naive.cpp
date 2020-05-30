@@ -32,24 +32,24 @@ int main() {
 
     M res = multiply_simple_multi_wrapper(l, r);
     print(res);
-    
+
 
     cout << "\nSingle threaded" << endl;
     for (int i=0; i<4; i++)
         cout << bench_simple_single(999, 1588, 777).count() << "ms" << endl;
-    
+
     cout << "\nMulti threaded 1" << endl;
     for (int i=0; i<4; i++)
         cout << bench_simple_multi(999, 1588, 777, 1).count() << "ms" << endl;
-    
+
     cout << "\nMulti threaded 2" << endl;
     for (int i=0; i<4; i++)
         cout << bench_simple_multi(999, 1588, 777, 2).count() << "ms" << endl;
-    
+
     cout << "\nMulti threaded 4" << endl;
     for (int i=0; i<4; i++)
         cout << bench_simple_multi(999, 1588, 777, 4).count() << "ms" << endl;
-    
+
     cout << "\nMulti threaded 8" << endl;
     for (int i=0; i<4; i++)
         cout << bench_simple_multi(999, 1588, 777, 8).count() << "ms" << endl;

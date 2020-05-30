@@ -1,8 +1,7 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python3
 
 from utils.analyze import analyze
 from utils.lab import main
 
-
 main()
-#analyze()
+# analyze()

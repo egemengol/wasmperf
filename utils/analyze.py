@@ -1,7 +1,8 @@
 from pathlib import Path
-from typing import Optional, List, NamedTuple, Tuple
-import pandas as pd
+from typing import List, NamedTuple, Optional, Tuple
+
 import numpy as np
+import pandas as pd
 
 
 class Run(NamedTuple):
@@ -34,13 +35,7 @@ class Run(NamedTuple):
         durs = np.array(durs)
 
         return cls(
-            alg_name,
-            arch,
-            tuple(params.items()),
-            path,
-            runtime,
-            durs,
-            durs.mean(),
+            alg_name, arch, tuple(params.items()), path, runtime, durs, durs.mean(),
         )
 
 
@@ -55,7 +50,7 @@ def analyze():
         runs.append(r)
 
     df = pd.DataFrame(runs)
-    gr = df.groupby(['alg_name', 'params'])
+    gr = df.groupby(["alg_name", "params"])
     for k, v in gr.groups.items():
         group_df = df.iloc[v].drop(["alg_name", "params", "path"], axis=1)
         alg_name = k[0]

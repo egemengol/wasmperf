@@ -1,9 +1,11 @@
 .mypy_cache
 .vscode
-.idea
+**/.idea
 logs/
 out/
 utils/__pycache__/
 __pycache__/
 utils/__pycache__/experiment_test.cpython-37.pyc
 utils/__pycache__/experiment.cpython-37.pyc
+.ipynb_checkpoints/
+**/cmake-build-debug

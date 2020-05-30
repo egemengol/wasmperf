@@ -51,7 +51,7 @@ private:
 };
 } // namespace util
 
-// Merges two sections of arr[]: arr[l..m] and arr[m+1..r] 
+// Merges two sections of arr[]: arr[l..m] and arr[m+1..r]
 void merge(array& arr, array& tmp, size_t l, size_t m, size_t r) {
   assert(l <= m && m <= r);
 
@@ -66,7 +66,7 @@ void merge(array& arr, array& tmp, size_t l, size_t m, size_t r) {
   for (size_t i = 0; i < n2; ++i) {
     tmp[m + 1 + i] = arr[m + 1 + i];
   }
-  
+
   // Merge the temp arrays back into arr[l..r]
   size_t i = 0, j = 0, k = l;
   while (i < n1 && j < n2) {
@@ -99,10 +99,10 @@ void mergeSort(array& arr, array& tmp, size_t l, size_t r) {
     mergeSort(arr, tmp, m + 1, r);
     merge(arr, tmp, l, m, r);
   }
-} 
+}
 
-int main() 
-{ 
+int main()
+{
   //std::cout << "Sorting "<< N <<" floats on "<< (SINGLE_THREADED? "single thread" : std::to_string(MAX_THREADS)+" threads") << std::endl;
 
   // Allocate arrays on the heap (to avoid stack overflow)
@@ -122,10 +122,10 @@ int main()
 
   if constexpr (SINGLE_THREADED) { // ==========================================
     mergeSort(arr, tmp, 0, N - 1);
-  } 
+  }
   else // multiple threads =====================================================
   {
-    // Build indices of sub-arrays for the highest level. 
+    // Build indices of sub-arrays for the highest level.
     // For lower levels, it'll be traversed with `stride` depending on the level.
     static const std::array<size_t, MAX_THREADS + 1> n = ComputeArrIndices();
 
@@ -144,11 +144,11 @@ int main()
       static auto sort_future3 = std::async(ASYNC [&arr, &tmp] { mergeSort(arr, tmp, n[3], n[4]-1); });
 
       // Merge two sub-arrays
-      sort_future[0] = std::async(ASYNC [&arr, &tmp] { 
-        sort_future0.get(); sort_future1.get(); merge(arr, tmp, n[0], n[1]-1, n[2]-1); 
+      sort_future[0] = std::async(ASYNC [&arr, &tmp] {
+        sort_future0.get(); sort_future1.get(); merge(arr, tmp, n[0], n[1]-1, n[2]-1);
       });
-      sort_future[1] = std::async(ASYNC [&arr, &tmp] { 
-        sort_future2.get(); sort_future3.get(); merge(arr, tmp, n[2], n[3]-1, n[4]-1); 
+      sort_future[1] = std::async(ASYNC [&arr, &tmp] {
+        sort_future2.get(); sort_future3.get(); merge(arr, tmp, n[2], n[3]-1, n[4]-1);
       });
     }
     else if constexpr (N_LEVELS > 2) // 8 or more threads ----------------------
@@ -162,8 +162,8 @@ int main()
       for (size_t level = N_LEVELS; level > 0; --level) {
         constexpr size_t one = 1;
         const size_t N_threads = one << level;              // # of threads for this level
-        const size_t stride    = one << (N_LEVELS - level); // stride for indices in `n` 
-  
+        const size_t stride    = one << (N_LEVELS - level); // stride for indices in `n`
+
         // On 1st pass, wait for mergeSort() futures; later--on merge() futures from previous pass
         const size_t N_to_wait = (level == N_LEVELS)? MAX_THREADS : 2 * N_threads;
         for (size_t i = 0; i < N_to_wait; ++i) {
@@ -179,20 +179,20 @@ int main()
         }
       } // level loop
     } //------------------------------------------------------------------------
-    sort_future[0].get();  
+    sort_future[0].get();
     sort_future[1].get();
     merge(arr, tmp, n[0], n[MAX_THREADS/2] - 1, n[MAX_THREADS] - 1);
   } // =========================================================================
 
   const auto elapsed_uS = stopwatch.stop();
-  
+
   // Check that the array is indeed sorted
   const bool ok = [&arr]() {
     for (size_t i = 1; i < N; ++i) if (arr[i - 1] > arr[i]) return false;
     return true;
   }();
   std::cout << elapsed_uS / 1'000 << std::endl;
-  //std::cout << "Sorted " << (ok ? "successfully" : "UNSUCCESSFULLY") 
+  //std::cout << "Sorted " << (ok ? "successfully" : "UNSUCCESSFULLY")
   //          << " in " << elapsed_uS / 1'000'000 << " seconds" << std::endl;
   return (ok)? 0 : 13;
 }

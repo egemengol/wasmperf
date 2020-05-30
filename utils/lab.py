@@ -1,19 +1,15 @@
-import yaml
-from pathlib import Path
-from dataclasses import dataclass
-from typing import Dict, Any, List, Type
 import logging
-import subprocess
-import shutil
 import os
+import shutil
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Type
 
-from utils.experiment import (
-    Experiment,
-    ExperimentNative,
-    ExperimentWasm,
-    ExperimentWasmSingle,
-    ExperimentWasmMulti,
-    )
+import yaml
+
+from utils.experiment import (Experiment, ExperimentNative, ExperimentWasm,
+                              ExperimentWasmMulti, ExperimentWasmSingle)
 
 
 @dataclass
@@ -29,8 +25,8 @@ class Lab:
 
         for alg_name, comparisons in yam["algs"].items():
             for comp in comparisons:
-                arches: List[str] = comp['arch']
-                runs: List[Dict[str, Any]] = comp['runs']
+                arches: List[str] = comp["arch"]
+                runs: List[Dict[str, Any]] = comp["runs"]
                 for arch in arches:
                     for run in runs:
                         cl: Type[Experiment]
@@ -48,8 +44,8 @@ class Lab:
                             continue
                         e = cl(
                             alg_name=alg_name,
-                            params=run['params'],
-                            repetitions=run['reps'],
+                            params=run["params"],
+                            repetitions=run["reps"],
                             browsers=browsers,
                         )
                         experiments.append(e)
@@ -69,7 +65,7 @@ class Lab:
                 targets.append(exp.target_path)
                 rules.append(exp.make_command)
 
-            targets = ' '.join([str(t) for t in targets])
+            targets = " ".join([str(t) for t in targets])
 
             f.write(f"all: {targets}\n\n")
 
@@ -94,17 +90,13 @@ class Lab:
     def copy_index_html(self):
         for e in self.exps:
             if issubclass(type(e), ExperimentWasm):
-                shutil.copyfile(
-                    Path("static/index.html"),
-                    e.dir_path / "index.html")
+                shutil.copyfile(Path("static/index.html"), e.dir_path / "index.html")
 
     def make(self):
         cwd = Path.cwd()
         os.chdir("out")
         subprocess.run(
-            ["make", "-j4"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            ["make", "-j4"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         )
         os.chdir(cwd)
         logging.info("Finished make")
