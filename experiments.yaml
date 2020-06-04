@@ -1,36 +1,62 @@
 ---
 algs:
-  memcpy_shuffle:
-    - arch:
-        - NATIVE
-        - WASM_MULTI
-          - /usr/bin/google-chrome
-      runs:
-        - params:
-            SIZE: 8000003
-            NUM_THREADS: 4
-            MEASURE_PER_RUN: 10
-          reps: 2
-  memcpy_block:
-    - arch:
-        - NATIVE
-        - WASM_MULTI
-          - /usr/bin/google-chrome
-      runs:
-        - params:
-            SIZE: 80000000
-            NUM_THREADS: 2
-            MEASURE_PER_RUN: 10
-          reps: 2
+  # memcpy_shuffle:
+  #   - arch:
+  #       - NATIVE
+  #       - WASM_MULTI
+  #         - /usr/bin/google-chrome
+  #     runs:
+  #       - params:
+  #           SIZE: 8000003
+  #           NUM_THREADS: 4
+  #           MEASURE_PER_RUN: 10
+  #         reps: 2
+  # memcpy_block:
+  #   - arch:
+  #       - NATIVE
+  #       - WASM_MULTI
+  #         - /usr/bin/google-chrome
+  #     runs:
+  #       - params:
+  #           SIZE: 80000000
+  #           NUM_THREADS: 2
+  #           MEASURE_PER_RUN: 10
+  #         reps: 2
   atomics:
     - arch:
         - NATIVE
         - WASM_MULTI
           - /usr/bin/google-chrome
+          - /home/egeme/bin/firefox/firefox
       runs:
         - params:
-            COUNT_PER_THREAD: 1000000
+            TOTAL_COUNT: 1000000
+            NUM_THREADS: 1
+            MEASURE_PER_RUN: 10
+          reps: 2
+        - params:
+            TOTAL_COUNT: 1000000
+            NUM_THREADS: 2
+            MEASURE_PER_RUN: 10
+          reps: 2
+        - params:
+            TOTAL_COUNT: 1000000
             NUM_THREADS: 3
+            MEASURE_PER_RUN: 10
+          reps: 2
+        - params:
+            TOTAL_COUNT: 1000000
+            NUM_THREADS: 4
+            MEASURE_PER_RUN: 10
+          reps: 2
+        - params:
+            TOTAL_COUNT: 1000000
+            NUM_THREADS: 6
+            MEASURE_PER_RUN: 10
+          reps: 2
+        - params:
+            TOTAL_COUNT: 1000000
+            NUM_THREADS: 8
             MEASURE_PER_RUN: 10
           reps: 2
   # matrix_naive:

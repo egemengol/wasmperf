@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import List, NamedTuple, Optional, Tuple
 
 import numpy as np
-import pandas as pd
 
 
 class Run(NamedTuple):
@@ -18,7 +17,7 @@ class Run(NamedTuple):
         tokens = path.name.split("!")
         alg_name = tokens[0]
         arch = tokens[1]
-        runtime = None
+        runtime = "native"
         if arch == "wasm_single" or arch == "wasm_multi":
             runtime = tokens.pop()
         params = dict()
@@ -33,10 +32,10 @@ class Run(NamedTuple):
 
         durs = np.array(durs)
 
-        return cls(alg_name, arch, tuple(params.items()), path, runtime, durs,)
+        return cls(alg_name, arch, tuple(params.items()), path, runtime, durs)
 
 
-def analyze():
+def get_runs(alg_name: str = None):
     runs: List[Run] = list()
 
     log_path = Path("logs")
@@ -44,18 +43,6 @@ def analyze():
         if p.name == "err":
             continue
         r = Run.from_path(p)
-        runs.append(r)
-
-    df = pd.DataFrame(runs)
-    gr = df.groupby(["alg_name", "params"])
-    for k, v in gr.groups.items():
-        group_df = df.iloc[v].drop(["alg_name", "params", "path"], axis=1)
-        alg_name = k[0]
-        params = dict(k[1])
-        print(alg_name, params)
-        print(group_df)
-        print()
-
-
-if __name__ == "__main__":
-    analyze()
+        if alg_name is None or alg_name == r.alg_name:
+            runs.append(r)
+    return runs
