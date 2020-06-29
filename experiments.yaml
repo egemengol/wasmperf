@@ -4,135 +4,159 @@ algs:
   #   - arch:
   #       - NATIVE
   #       - WASM_MULTI
-  #         - /usr/bin/google-chrome
+  #         - /opt/google/chrome-unstable/google-chrome
+  #         - /home/egeme/bin/firefox/firefox
   #     runs:
   #       - params:
-  #           SIZE: 8000003
+  #           SIZE: 8000000
+  #           NUM_THREADS: 1
+  #           MEASURE_PER_RUN: 30
+  #         reps: 10
+  #       - params:
+  #           SIZE: 8000000
+  #           NUM_THREADS: 2
+  #           MEASURE_PER_RUN: 30
+  #         reps: 12
+  #       - params:
+  #           SIZE: 8000000
   #           NUM_THREADS: 4
-  #           MEASURE_PER_RUN: 10
-  #         reps: 2
+  #           MEASURE_PER_RUN: 30
+  #         reps: 13
+  #       - params:
+  #           SIZE: 8000000
+  #           NUM_THREADS: 6
+  #           MEASURE_PER_RUN: 30
+  #         reps: 15
   # memcpy_block:
   #   - arch:
   #       - NATIVE
   #       - WASM_MULTI
-  #         - /usr/bin/google-chrome
+  #         - /opt/google/chrome-unstable/google-chrome
+  #         - /home/egeme/bin/firefox/firefox
+  #     runs:
+  #       # - params:
+  #       #     SIZE: 80000000
+  #       #     NUM_THREADS: 1
+  #       #     MEASURE_PER_RUN: 30
+  #       #   reps: 10
+  #       # - params:
+  #       #     SIZE: 80000000
+  #       #     NUM_THREADS: 2
+  #       #     MEASURE_PER_RUN: 30
+  #       #   reps: 12
+  #       # - params:
+  #       #     SIZE: 80000000
+  #       #     NUM_THREADS: 4
+  #       #     MEASURE_PER_RUN: 30
+  #       #   reps: 14
+  #       # - params:
+  #       #     SIZE: 80000000
+  #       #     NUM_THREADS: 6
+  #       #     MEASURE_PER_RUN: 30
+  #       #   reps: 5
+  # atomics:
+  #   - arch:
+  #       - NATIVE
+  #       - WASM_MULTI
+  #         - /opt/google/chrome-unstable/google-chrome
+  #         - /home/egeme/bin/firefox/firefox
   #     runs:
   #       - params:
-  #           SIZE: 80000000
+  #           TOTAL_COUNT: 1000000
+  #           NUM_THREADS: 1
+  #           MEASURE_PER_RUN: 30
+  #         reps: 11
+  #       - params:
+  #           TOTAL_COUNT: 1000000
   #           NUM_THREADS: 2
-  #           MEASURE_PER_RUN: 10
-  #         reps: 2
-  atomics:
+  #           MEASURE_PER_RUN: 30
+  #         reps: 12
+  #       - params:
+  #           TOTAL_COUNT: 1000000
+  #           NUM_THREADS: 3
+  #           MEASURE_PER_RUN: 30
+  #         reps: 13
+  #       - params:
+  #           TOTAL_COUNT: 1000000
+  #           NUM_THREADS: 4
+  #           MEASURE_PER_RUN: 30
+  #         reps: 14
+  #       - params:
+  #           TOTAL_COUNT: 1000000
+  #           NUM_THREADS: 6
+  #           MEASURE_PER_RUN: 30
+  #         reps: 15
+  #       - params:
+  #           TOTAL_COUNT: 1000000
+  #           NUM_THREADS: 8
+  #           MEASURE_PER_RUN: 30
+  #         reps: 16
+  matrix_naive:
+    # - arch:
+    #     - NATIVE
+    #     - WASM_MULTI
+    #       - /opt/google/chrome-unstable/google-chrome
+    #       - /home/egeme/bin/firefox/firefox
+    #   runs:
+    #     - params:
+    #         A: 2000
+    #         B: 1200
+    #         C: 1500
+    #         SEED: 13
+    #         NUM_THREADS: 4
+    #       reps: 9
+    #     - params:
+    #         A: 2000
+    #         B: 1200
+    #         C: 1500
+    #         SEED: 13
+    #         NUM_THREADS: 2
+    #       reps: 11
+    #     - params:
+    #         A: 2000
+    #         B: 1200
+    #         C: 1500
+    #         SEED: 13
+    #         NUM_THREADS: 1
+    #       reps: 13
     - arch:
         - NATIVE
-        - WASM_MULTI
-          - /usr/bin/google-chrome
+        - WASM_SINGLE
+          - /opt/google/chrome-unstable/google-chrome
           - /home/egeme/bin/firefox/firefox
       runs:
         - params:
-            TOTAL_COUNT: 1000000
-            NUM_THREADS: 1
-            MEASURE_PER_RUN: 10
-          reps: 2
-        - params:
-            TOTAL_COUNT: 1000000
-            NUM_THREADS: 2
-            MEASURE_PER_RUN: 10
-          reps: 2
-        - params:
-            TOTAL_COUNT: 1000000
-            NUM_THREADS: 3
-            MEASURE_PER_RUN: 10
-          reps: 2
-        - params:
-            TOTAL_COUNT: 1000000
-            NUM_THREADS: 4
-            MEASURE_PER_RUN: 10
-          reps: 2
-        - params:
-            TOTAL_COUNT: 1000000
-            NUM_THREADS: 6
-            MEASURE_PER_RUN: 10
-          reps: 2
-        - params:
-            TOTAL_COUNT: 1000000
-            NUM_THREADS: 8
-            MEASURE_PER_RUN: 10
-          reps: 2
-  # matrix_naive:
-  #   - arch:
-  #       - NATIVE
-  #       - WASM_MULTI
-  #         - /usr/bin/google-chrome
-  #         - /home/egeme/bin/firefox/firefox
-  #     runs:
-  #       - params:
-  #           A: 2000
-  #           B: 1200
-  #           C: 1500
-  #           SEED: 13
-  #           NUM_THREADS: 4
-  #         reps: 1
-  #   - arch:
-  #       - NATIVE
-  #       - WASM_MULTI
-  #         - /usr/bin/google-chrome
-  #         - /home/egeme/bin/firefox/firefox
-  #     runs:
-  #       - params:
-  #           A: 2000
-  #           B: 1200
-  #           C: 1500
-  #           SEED: 13
-  #           NUM_THREADS: 2
-  #         reps: 1
-  #   - arch:
-  #       - NATIVE
-  #       - WASM_MULTI
-  #         - /usr/bin/google-chrome
-  #         - /home/egeme/bin/firefox/firefox
-  #     runs:
-  #       - params:
-  #           A: 2000
-  #           B: 1200
-  #           C: 1500
-  #           SEED: 13
-  #           NUM_THREADS: 1
-  #         reps: 1
-  #   - arch:
-  #       - NATIVE
-  #       - WASM_SINGLE
-  #         - /usr/bin/google-chrome
-  #         - /home/egeme/bin/firefox/firefox
-  #     runs:
-  #       - params:
-  #           A: 999
-  #           B: 888
-  #           C: 777
-  #           SEED: 13
-  #         reps: 1
+            A: 2000
+            B: 1200
+            C: 1500
+            SEED: 13
+          reps: 9
   # merge:
   #   - arch:
   #       - WASM_MULTI
-  #         - /usr/bin/google-chrome
+  #         - /opt/google/chrome-unstable/google-chrome
   #         - /home/egeme/bin/firefox/firefox
   #       - NATIVE
   #     runs:
   #       - params:
   #           SIZE: 1000000
   #           N_LEVELS: 1
-  #         reps: 1
+  #         reps: 12
   #       - params:
   #           SIZE: 1000000
   #           N_LEVELS: 2
-  #         reps: 1
+  #         reps: 15
+  #       - params:
+  #           SIZE: 1000000
+  #           N_LEVELS: 4
+  #         reps: 18
   #   - arch:
   #       - WASM_SINGLE
   #         - /home/egeme/bin/firefox/firefox
-  #         - /usr/bin/google-chrome
+  #         - /opt/google/chrome-unstable/google-chrome
   #       - NATIVE
   #     runs:
   #       - params:
   #           SIZE: 1000000
   #           N_LEVELS: 0
-  #         reps: 1
+  #         reps: 11

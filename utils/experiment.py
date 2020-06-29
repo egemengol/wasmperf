@@ -76,8 +76,8 @@ class ExperimentNative(Experiment):
 
     @property
     def dir_path(self) -> Path:
-        params = "!".join([f"{k.lower()}+{v}" for k, v in self.params.items()])
-        return Path("out") / f"{self.alg_name}!native!{params}"
+        params = "X".join([f"{k.lower()}+{v}" for k, v in self.params.items()])
+        return Path("out") / f"{self.alg_name}XnativeX{params}"
 
     @property
     def log_path(self) -> Path:
@@ -110,7 +110,7 @@ class ExperimentWasm(Experiment):
     def run(self):
         for browser in self.browsers:
             for _ in range(self.repetitions):
-                log_path = str(self.log_path.resolve())+"!"+Path(browser).name
+                log_path = str(self.log_path.resolve())+"X"+Path(browser).name
                 p = subprocess.run([
                         "emrun",
                         "--browser",
@@ -141,9 +141,9 @@ class ExperimentWasmSingle(ExperimentWasm):
 
     @property
     def dir_path(self) -> Path:
-        params = "!".join([f"{k.lower()}+{v}" for k, v in self.params.items()])
+        params = "X".join([f"{k.lower()}+{v}" for k, v in self.params.items()])
         return Path("out") / (
-            f"{self.alg_name}!wasm_single!"
+            f"{self.alg_name}Xwasm_singleX"
             f"{params}")
 
     @property
@@ -182,9 +182,9 @@ class ExperimentWasmMulti(ExperimentWasm):
 
     @property
     def dir_path(self) -> Path:
-        params = "!".join([f"{k.lower()}+{v}" for k, v in self.params.items()])
+        params = "X".join([f"{k.lower()}+{v}" for k, v in self.params.items()])
         return Path("out") / (
-            f"{self.alg_name}!wasm_multi!"
+            f"{self.alg_name}Xwasm_multiX"
             f"{params}")
 
     @property

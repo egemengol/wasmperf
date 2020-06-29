@@ -1,3 +1,5 @@
+import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -5,7 +7,11 @@ import seaborn as sns
 
 from logs import get_runs
 
-view_df = pd.DataFrame(get_runs("atomics"))
+assert len(sys.argv) == 2
+runs = get_runs(sys.argv[1])
+assert runs, "Check alg_name"
+
+view_df = pd.DataFrame(runs)
 
 sns.set()
 
@@ -22,9 +28,8 @@ for i in df.index:
 
 
 # Drop specific
-df.drop(columns=["params", "measure_per_run"], inplace=True)
+df.drop(columns=["params"], inplace=True)
 
-print(df)
 
 ax = sns.barplot(
     data=df,
